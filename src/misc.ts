@@ -26,10 +26,8 @@ export function response(req: Request, res: Response, status: number, data: any 
         // Filter by {properties}
         Object.keys(req.query).forEach(prop => {
             if(!filterableProps.includes(prop) || !req.query[prop]) return;
-            data = data.filter((el: any) => el[prop] && el[prop].toLowerCase().includes(
-                //@ts-ignore
-                req.query[prop].toString().toLowerCase())
-            );
+            // @ts-ignore
+            data = data.filter((el: any) => el[prop] && el[prop].toUpperCase().includes(req.query[prop].toString().toUpperCase()));
         });
 
         // sort by...
@@ -37,8 +35,8 @@ export function response(req: Request, res: Response, status: number, data: any 
             // ...date
             if(req.query.sort.toString() === "date") {
                 data.sort((a, b) => {
-                    a = new Date(a.date.added);
-                    b = new Date(b.date.added);
+                    a = new Date(a.date);
+                    b = new Date(b.date);
                     return a > b ? -1 : a < b ? 1 : 0;
                 });
             }
