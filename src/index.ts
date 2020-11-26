@@ -9,7 +9,7 @@ import usersRoute from './ressources/users';
 
 // Create express instance and apply cors-restriction
 const app = express();
-app.use(cors({ origin: true }))
+app.use(cors());
 
 // Apply given routers
 app.use("/media", mediaRoute);

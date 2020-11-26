@@ -33,7 +33,6 @@ class DB {
                 q.Lambda("X", q.Get(q.Var("X")))
             )
         );
-        console.log(res);
         let data: any[] = [];
         res.data.forEach((doc: any) => data.push(DB.filterDoc(doc)));
         return data;
