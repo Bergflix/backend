@@ -18,9 +18,7 @@ app.use("/series", seriesRoute);
 app.use("/users", usersRoute);
 
 // Catch all other request to not run into an error
-app.all('/', (req, res) => response(req, res, 200, 'Welcome to the backend of bergflix! :)'));
-app.all('*', (req, res) => response(req, res, 404));
+app.all('/', (req: any, res: any) => response(req, res, 200, 'Welcome to the backend of bergflix'));
+app.all('*', (req: any, res: any) => response(req, res, 404));
 
-
-// Default export app
-export default app;
+app.listen(process.env.PORT, () => console.log("Backend listening"));

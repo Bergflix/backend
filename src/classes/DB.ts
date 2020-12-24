@@ -1,5 +1,6 @@
-import * as functions from "firebase-functions";
-import {Client, query as q} from "faunadb";
+import * as PouchDB from 'pouchdb';
+import * as PouchDBFind from 'pouchdb-find';
+PouchDB.plugin(PouchDBFind);
 
 class DB {
 
@@ -11,57 +12,64 @@ class DB {
     private readonly db: any;
 
     constructor() {
-        this.db = new Client({
-            secret: functions.config().database.secret,
-            domain: "db.fauna.com",
-            scheme: "https"
+        this.db = new PouchDB(process.env.DB_PATH, {
+            auth: {
+                username: process.env.DB_USER,
+                password: process.env.DB_PASS
+            }
         });
-        console.log("Fauna-Client connected");
+        this.db.info().then(() => console.log("PouchDB loaded")).catch((e: any) => console.error("PouchDB Error:", e));
     }
 
     /**
      *
      * @param {string} type
      *  The ressourcetype as string (eg. all, movies, series)
-     * @return {Promise<Array<Object>>} Result array
+     * @return {Promise<Array<any>>} Result array
      */
-    async getMediaList(type: string) {
-        let set = type === "all" ? q.Documents(q.Collection("media")) : q.Match(q.Index("media_by_type"), type);
-        let res = await this.db.query(
-            q.Map(
-                q.Paginate(set),
-                q.Lambda("X", q.Get(q.Var("X")))
-            )
-        );
-        let data: any[] = [];
-        res.data.forEach((doc: any) => data.push(DB.filterDoc(doc)));
-        return data;
+    async getMediaList(type: string) : Promise<Array<any>> {
+        return [];
     }
-
+    
     /**
      *
      * @param ref
-     * @return {Promise<Object>} Result
+     * @return {Promise<any>} Result
      */
     async getMedia(ref: string) {
-        let doc = await this.db.query(
-            q.Get(q.Ref(q.Collection("media"), ref))
-        );
+        return {};
+    }
+
+    
+    async getList(type: string){
+        // make the query with the type
+        let docs = await this.db.query(`scripts/${type}`);
+        let data: any[] = [];
+        // go through each row
+        docs.rows.forEach((row: any) => data.push(DB.filterDoc(row.value)));
+        // return the data
+        return data;
+    }
+
+    async find(selector: object){
+        let data = await this.db.find({selector})
+        let doc = data.docs[0];
         return DB.filterDoc(doc);
     }
 
+    
     /**
      *
      * @param doc
      * @private
-     * @return {Object} Result
+     * @return {any} Result
      */
     private static filterDoc(doc: any) {
-        return {
-            id: doc.ref.value.id,
-            ...doc.data
-        };
+        doc._id && delete doc._id;
+        doc._rev && delete doc._rev;
+        return doc;
     }
+
 }
 
 export default new DB();
