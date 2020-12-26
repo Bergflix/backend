@@ -1,0 +1,8 @@
+version: '3'
+services: 
+  bergflix:
+    build: .
+    env_file: 
+      - '.env.prod'
+    ports:
+      - '18020:8080'
